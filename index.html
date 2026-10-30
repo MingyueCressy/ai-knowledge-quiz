@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI 知识测验 · 26 题</title>
+<style>
+:root{
+  --blue:#156082; --blue-d:#0e4760; --blue-l:#e8f1f6;
+  --orange:#E97132; --orange-d:#c2551c; --orange-l:#fdf0e7;
+  --ink:#1f2b33; --muted:#6b7b86; --line:#d7e2ea; --ok:#1f8a56; --ok-l:#e8f6ef;
+  --bad:#c0392b; --bad-l:#fdecea;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+body{
+  font-family:"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+  background:linear-gradient(160deg,#f4f7fa 0%,#e6eef4 100%);
+  color:var(--ink);min-height:100vh;padding:24px 16px 60px;
+  display:flex;flex-direction:column;align-items:center;line-height:1.65;
+}
+.wrap{width:100%;max-width:760px;}
+header{text-align:center;margin-bottom:22px;}
+header h1{font-size:24px;font-weight:600;color:var(--blue-d);letter-spacing:1px;margin-bottom:8px;}
+header p{font-size:13px;color:var(--muted);}
+.meta{background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px 18px;font-size:13px;color:#4a5c68;margin-bottom:22px;}
+.meta b{color:var(--blue-d);}
+.group{margin-bottom:26px;}
+.group h2{
+  font-size:14px;font-weight:600;color:var(--blue-d);letter-spacing:.5px;
+  background:var(--blue-l);border-left:4px solid var(--blue);
+  padding:9px 14px;border-radius:0 8px 8px 0;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;
+}
+.group h2 span{font-size:12px;font-weight:400;color:var(--muted);}
+.q{background:#fff;border:1px solid var(--line);border-radius:12px;padding:15px 17px;margin-bottom:10px;transition:border-color .15s,box-shadow .15s;}
+.q.answered{border-color:#b9cfe0;}
+.q .num{display:inline-block;font-size:12px;font-weight:600;color:var(--blue);background:var(--blue-l);border-radius:6px;padding:1px 8px;margin-right:8px;vertical-align:2px;}
+.q .stem{font-size:14.5px;display:inline;}
+.opts{display:flex;gap:10px;margin-top:11px;flex-wrap:wrap;}
+.opt{
+  flex:1;min-width:120px;border:1.5px solid var(--line);border-radius:9px;background:#fbfcfd;
+  padding:8px 12px;cursor:pointer;font-size:13.5px;color:#3c4c57;transition:all .13s;
+  display:flex;align-items:center;justify-content:center;gap:6px;user-select:none;
+}
+.opt:hover{border-color:var(--blue);background:var(--blue-l);}
+.opt.sel{border-color:var(--blue);background:var(--blue);color:#fff;font-weight:500;}
+.opt.right{border-color:var(--ok);background:var(--ok-l);color:var(--ok);font-weight:600;}
+.opt.wrong{border-color:var(--bad);background:var(--bad-l);color:var(--bad);font-weight:600;}
+.opt.sel.right{background:var(--ok);color:#fff;}
+.opt.sel.wrong{background:var(--bad);color:#fff;}
+.pct{margin-top:9px;font-size:12px;color:var(--muted);display:none;}
+.pct.show{display:block;}
+.pct em{font-style:normal;color:var(--orange-d);font-weight:600;}
+.actions{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin:26px 0 20px;}
+button{
+  border:none;border-radius:11px;padding:12px 30px;font-size:15px;cursor:pointer;
+  font-family:inherit;font-weight:500;transition:all .15s;
+}
+#submit{background:var(--blue);color:#fff;box-shadow:0 4px 12px rgba(21,96,130,.25);}
+#submit:hover{background:var(--blue-d);}
+#reset{background:#fff;color:var(--blue);border:1.5px solid var(--line);}
+#reset:hover{border-color:var(--blue);}
+#result{display:none;}
+#result.show{display:block;}
+.card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:24px;margin-bottom:18px;box-shadow:0 4px 18px rgba(31,43,51,.06);}
+.total{text-align:center;margin-bottom:20px;}
+.total .big{font-size:52px;color:var(--blue-d);font-weight:600;line-height:1.1;}
+.total .big small{font-size:20px;color:var(--muted);font-weight:400;}
+.total .cmp{font-size:13px;color:var(--muted);margin-top:6px;}
+.total .lvl{display:inline-block;margin-top:12px;padding:6px 18px;border-radius:20px;font-size:13px;font-weight:600;}
+.compare{margin-top:16px;}
+.compare .row{display:flex;align-items:center;gap:10px;margin-bottom:9px;font-size:13px;}
+.compare .label{width:130px;color:#4a5c68;flex-shrink:0;}
+.bar{flex:1;height:9px;background:#eef2f5;border-radius:5px;overflow:hidden;}
+.bar>i{display:block;height:100%;border-radius:5px;transition:width .6s ease;}
+.compare .val{width:70px;text-align:right;color:var(--muted);font-size:12px;flex-shrink:0;}
+.hint{font-size:12.5px;color:var(--muted);line-height:1.8;margin-top:14px;padding-top:14px;border-top:1px dashed var(--line);}
+details{background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px 18px;margin-top:14px;}
+details summary{cursor:pointer;font-size:13.5px;color:var(--blue-d);font-weight:500;}
+details .ans{font-size:13px;color:#4a5c68;margin-top:10px;line-height:1.9;}
+footer{text-align:center;font-size:12px;color:#93a4b0;margin-top:30px;line-height:1.9;}
+footer a{color:var(--blue);text-decoration:none;}
+@media(max-width:480px){
+  body{padding:18px 12px 50px;}
+  header h1{font-size:20px;}
+  .compare .label{width:96px;font-size:12px;}
+  .opt{min-width:0;flex-basis:calc(50% - 5px);}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>AI 知识测验</h1>
+    <p>Klein-Avraham et al. (2026) 性能本位量表 · 正式版 26 题</p>
+  </header>
+
+  <div class="meta">
+    <b>作答说明</b><br>
+    全卷分为内容知识、程序知识、认知知识三类，各覆盖 AI 技术、AI 与用户、AI 与社会三个领域。<br>
+    第一部分（第 2 至 8 题）判断该技术是否使用人工智能，其余各题判断陈述的正误。<br>
+    答完点“交卷”，逐题显示对错，并与原文 800 人常模比对。
+  </div>
+
+  <div id="quiz"></div>
+
+  <div class="actions">
+    <button id="submit">交　卷</button>
+    <button id="reset">重　做</button>
+  </div>
+
+  <div id="result"></div>
+
+  <footer>
+    题目来源 · Klein-Avraham, I., Ston, R., Atias, O., Roll, I., &amp; Baram-Tsabari, A. (2026)<br>
+    Measuring different types and domains of AI knowledge. <i>Computers &amp; Education, 247</i>, 105573.<br>
+    <a href="https://doi.org/10.1016/j.compedu.2026.105573" target="_blank">doi:10.1016/j.compedu.2026.105573</a><br>
+    原文初拟 27 题，第 14 题因因子载荷过低被剔除，本卷为题号沿用原文的 26 题正式版。仅供学习自测。
+  </footer>
+</div>
+
+<script>
+const TF = {t:"正确", f:"错误"};
+const YN = {y:"使用 AI", n:"不使用 AI"};
+
+const DATA = [
+  {group:"内容知识 · AI 技术", note:"Content × Technology", type:"content", domain:"tech", items:[
+    {n:1, stem:"所有算法都是人工智能的一种形式。", opts:TF, ans:"f", pct:26.6}
+  ]},
+  {group:"内容知识 · AI 与用户", note:"Content × User · 判断该技术是否使用 AI", type:"content", domain:"user", items:[
+    {n:2, stem:"我们用手机拍照时的人脸识别功能。", opts:YN, ans:"y", pct:80.9},
+    {n:3, stem:"即便是经验丰富的用户，有时也不知道自己正在使用 AI。", opts:TF, ans:"t", pct:73.5},
+    {n:4, stem:"社交媒体，如 Facebook、Instagram、TikTok。", opts:YN, ans:"y", pct:72.8},
+    {n:5, stem:"自动售货机，如饮料售货机。", opts:YN, ans:"n", pct:64.4},
+    {n:6, stem:"流媒体服务，如 YouTube、Netflix、AppleTV。", opts:YN, ans:"y", pct:57},
+    {n:7, stem:"智能手机上的计算器应用。", opts:YN, ans:"n", pct:52},
+    {n:8, stem:"自助收银台。", opts:YN, ans:"n", pct:43.4}
+  ]},
+  {group:"内容知识 · AI 与社会", note:"Content × Society", type:"content", domain:"society", items:[
+    {n:9, stem:"多种 AI 应用已经被使用了几十年。", opts:TF, ans:"t", pct:47.4}
+  ]},
+  {group:"程序知识 · AI 技术", note:"Procedural × Technology", type:"procedural", domain:"tech", items:[
+    {n:10, stem:"一些 AI 技术通过在训练数据中识别模式来学习。", opts:TF, ans:"t", pct:84.3},
+    {n:11, stem:"训练时提供给 AI 的样例会影响其输出。", opts:TF, ans:"t", pct:80.9},
+    {n:12, stem:"一些 AI 技术可以从与之互动的人类那里学习。", opts:TF, ans:"t", pct:75.6},
+    {n:13, stem:"生成式 AI，如 ChatGPT，回答你时会考虑此前对话的语境。", opts:TF, ans:"t", pct:63.4}
+  ]},
+  {group:"程序知识 · AI 与用户", note:"Procedural × User", type:"procedural", domain:"user", items:[
+    {n:15, stem:"使用生成式 AI 需要具备编程方面的先备知识。", opts:TF, ans:"f", pct:62.1},
+    {n:16, stem:"使用生成式 AI 时，提示词的措辞对输出没有影响。", opts:TF, ans:"f", pct:57}
+  ]},
+  {group:"程序知识 · AI 与社会", note:"Procedural × Society", type:"procedural", domain:"society", items:[
+    {n:17, stem:"生成式 AI 可能侵犯艺术家的版权。", opts:TF, ans:"t", pct:57.9},
+    {n:18, stem:"生成式 AI 给出的答案可能复制社会刻板印象，例如把医生称为男性、把护士称为女性。", opts:TF, ans:"t", pct:52.1}
+  ]},
+  {group:"认知知识 · AI 技术", note:"Epistemic × Technology", type:"epistemic", domain:"tech", items:[
+    {n:19, stem:"生成式 AI，如 ChatGPT，提供的答案总是真实的。", opts:TF, ans:"f", pct:69.5},
+    {n:20, stem:"生成式 AI，如 ChatGPT，只基于可信且在该主题上具备专业知识的来源。", opts:TF, ans:"f", pct:47.9},
+    {n:21, stem:"AI 的输出不包含偏见，如刻板印象、偏见。", opts:TF, ans:"f", pct:43.9}
+  ]},
+  {group:"认知知识 · AI 与用户", note:"Epistemic × User", type:"epistemic", domain:"user", items:[
+    {n:22, stem:"有时很难察觉生成式 AI 正在提供错误信息。", opts:TF, ans:"t", pct:74.9},
+    {n:23, stem:"用户通常不知道是什么使生成式 AI 以某种特定的方式表述其答案。", opts:TF, ans:"t", pct:71.8},
+    {n:24, stem:"有时即使用户问了同一个问题，从生成式 AI 那里得到的答案也会不同。", opts:TF, ans:"t", pct:61.5}
+  ]},
+  {group:"认知知识 · AI 与社会", note:"Epistemic × Society", type:"epistemic", domain:"society", items:[
+    {n:25, stem:"AI 生成的信息可能代表主流意见，而忽视少数群体的视角。", opts:TF, ans:"t", pct:56.6},
+    {n:26, stem:"生成式 AI 在不同语言下提供的回答质量相当。", opts:TF, ans:"f", pct:35},
+    {n:27, stem:"理解 AI 所做决策的原因很容易。", opts:TF, ans:"f", pct:29.9}
+  ]}
+];
+
+// 原文 800 人常模（27 题口径，均值 15.42，SD 5.14）。此处用于横向比对，按各类别题数折算为平均答对数
+const NORM = {total:15.42, sd:5.14};
+
+const answers = {};
+const quiz = document.getElementById('quiz');
+let submitted = false;
+
+function render(){
+  quiz.innerHTML = DATA.map(g => `
+    <div class="group">
+      <h2>${g.group}<span>${g.note}</span></h2>
+      ${g.items.map(it => `
+        <div class="q" id="q${it.n}">
+          <span class="num">${it.n}</span><span class="stem">${it.stem}</span>
+          <div class="opts">
+            ${Object.entries(it.opts).map(([k,v]) =>
+              `<div class="opt" data-q="${it.n}" data-k="${k}">${v}</div>`).join('')}
+          </div>
+          <div class="pct" id="p${it.n}"></div>
+        </div>
+      `).join('')}
+    </div>
+  `).join('');
+  quiz.querySelectorAll('.opt').forEach(el => {
+    el.addEventListener('click', () => {
+      if(submitted) return;
+      const q = el.dataset.q;
+      answers[q] = el.dataset.k;
+      quiz.querySelectorAll(`.opt[data-q="${q}"]`).forEach(o => o.classList.remove('sel'));
+      el.classList.add('sel');
+      document.getElementById('q'+q).classList.add('answered');
+    });
+  });
+}
+
+function allItems(){
+  return DATA.flatMap(g => g.items.map(it => Object.assign({}, it, {group:g.group, type:g.type, domain:g.domain})));
+}
+
+document.getElementById('submit').addEventListener('click', () => {
+  const items = allItems();
+  const missing = items.filter(it => !answers[it.n]).length;
+  if(missing > 0){
+    if(!confirm(`还有 ${missing} 题未作答，确定要交卷吗？`)) return;
+  }
+  submitted = true;
+
+  let correct = 0;
+  const byType = {}, byDomain = {};
+  items.forEach(it => {
+    const chosen = answers[it.n];
+    const isRight = chosen === it.ans;
+    if(isRight) correct++;
+
+    byType[it.type] = byType[it.type] || {ok:0, n:0};
+    byType[it.type].n++; if(isRight) byType[it.type].ok++;
+    byDomain[it.domain] = byDomain[it.domain] || {ok:0, n:0};
+    byDomain[it.domain].n++; if(isRight) byDomain[it.domain].ok++;
+
+    const qEl = document.getElementById('q'+it.n);
+    const pEl = document.getElementById('p'+it.n);
+    qEl.querySelectorAll('.opt').forEach(o => {
+      o.classList.remove('sel');
+      if(o.dataset.k === it.ans) o.classList.add('right');
+      if(chosen && o.dataset.k === chosen && chosen !== it.ans) o.classList.add('wrong');
+    });
+    pEl.classList.add('show');
+    pEl.innerHTML = chosen
+      ? `${isRight ? '✅ 答对' : '❌ 答错'}　原文正确率 <em>${it.pct}%</em>`
+      : `未作答　原文正确率 <em>${it.pct}%</em>`;
+  });
+
+  const total = items.length;
+  const pct = Math.round(correct / total * 100);
+  let lvl, color;
+  if(correct >= 21){ lvl = '高于常模均值两个标准差以上'; color = '#1f8a56'; }
+  else if(correct >= 16){ lvl = '位于常模均值之上'; color = '#156082'; }
+  else if(correct >= 11){ lvl = '接近常模均值'; color = '#c2551c'; }
+  else { lvl = '低于常模均值'; color = '#c0392b'; }
+
+  const typeName = {content:'内容知识', procedural:'程序知识', epistemic:'认知知识'};
+  const domainName = {tech:'AI 技术', user:'AI 与用户', society:'AI 与社会'};
+
+  const bar = (label, ok, n, c) => `
+    <div class="row">
+      <div class="label">${label}</div>
+      <div class="bar"><i style="width:${n? ok/n*100:0}%;background:${c}"></i></div>
+      <div class="val">${ok}/${n}</div>
+    </div>`;
+
+  const res = document.getElementById('result');
+  res.innerHTML = `
+    <div class="card">
+      <div class="total">
+        <div class="big">${correct}<small> / ${total}</small></div>
+        <div class="cmp">得分率 ${pct}%　常模均值 ${NORM.total} 分，标准差 ${NORM.sd}</div>
+        <div class="lvl" style="background:${color}18;color:${color}">${lvl}</div>
+      </div>
+      <div class="compare">
+        <div style="font-size:13px;color:var(--blue-d);font-weight:600;margin-bottom:12px">按知识类型</div>
+        ${Object.keys(typeName).map(k => byType[k] ? bar(typeName[k], byType[k].ok, byType[k].n, '#156082') : '').join('')}
+        <div style="font-size:13px;color:var(--blue-d);font-weight:600;margin:18px 0 12px">按知识领域</div>
+        ${Object.keys(domainName).map(k => byDomain[k] ? bar(domainName[k], byDomain[k].ok, byDomain[k].n, '#E97132') : '').join('')}
+      </div>
+      <div class="hint">
+        原文结论提示，认知知识与社会领域是公众最薄弱的环节，且知识水平越高，对生成式 AI 的信任反而越低，原文称之为反思性信任。
+        若你在认知知识上得分偏低而总分不低，属于原文描述的典型分布。
+      </div>
+      <details>
+        <summary>展开逐题标准答案</summary>
+        <div class="ans">
+          ${items.map(it => `${it.n}. ${it.opts[it.ans]}　<span style="color:#93a4b0">${it.group}</span>`).join('<br>')}
+        </div>
+      </details>
+    </div>
+  `;
+  res.classList.add('show');
+  res.scrollIntoView({behavior:'smooth', block:'start'});
+});
+
+document.getElementById('reset').addEventListener('click', () => {
+  Object.keys(answers).forEach(k => delete answers[k]);
+  submitted = false;
+  document.getElementById('result').classList.remove('show');
+  render();
+  window.scrollTo({top:0, behavior:'smooth'});
+});
+
+render();
+</script>
+</body>
+</html>
